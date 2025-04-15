@@ -1,9 +1,9 @@
-# Random Problem Picker 🎯
+# Random Problem Picker 
 
 A simple yet powerful tool to randomly select DSA (Data Structures and Algorithms) problems from your curated list. Perfect for effective revision, interview preparation, and consistent practice.
 
 
-## 🚀 Features
+## Features
 
 - **Random Question Selection**: Get random DSA problems from your curated list
 - **Progress Tracking**: Track which problems you've already completed

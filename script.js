@@ -136,10 +136,10 @@ const questions = [
         title: "Time Based Key Value Store",
         link: "https://leetcode.com/problems/time-based-key-value-store/"
     },
-    {
-        title: "Median of Two Sorted Arrays",
-        link: "https://leetcode.com/problems/median-of-two-sorted-arrays/"
-    },
+    // {
+    //     title: "Median of Two Sorted Arrays",
+    //     link: "https://leetcode.com/problems/median-of-two-sorted-arrays/"
+    // },
 ];
 
 let completedQuestions = JSON.parse(localStorage.getItem('completedQuestions')) || [];

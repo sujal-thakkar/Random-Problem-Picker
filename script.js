@@ -112,7 +112,7 @@ const questions = [
         link: "https://leetcode.com/problems/largest-rectangle-in-histogram/"
     },
     // Binary Search:-
-    {
+    /* {
         title: "Binary Search",
         link: "https://leetcode.com/problems/binary-search/"
     },
@@ -139,7 +139,7 @@ const questions = [
     {
         title: "Median of Two Sorted Arrays",
         link: "https://leetcode.com/problems/median-of-two-sorted-arrays/"
-    },
+    }, */
 ];
 
 let completedQuestions = JSON.parse(localStorage.getItem('completedQuestions')) || [];

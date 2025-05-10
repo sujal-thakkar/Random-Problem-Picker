@@ -5,7 +5,7 @@
     --border-color: #ddd;
     --primary-color: #007bff;
     --success-color: #4caf50;
-    --danger-color: #ff5252;
+    --danger-color: #ea2239;
     --hover-bg: #f9f9f9;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
@@ -278,14 +278,14 @@ a:hover {
 }
 
 .reset-button {
-    background-color: var(--danger-color);
+    background-color: #e55511;
     margin-top: 10px;
     margin-bottom: 30px;
     transition: var(--theme-transition);
 }
 
 .reset-button:hover {
-    background-color: #d32f2f;
+    background-color: #c82c77;
 }
 
 .celebration {
@@ -689,6 +689,10 @@ a:hover {
     display: flex;
     justify-content: center;
     margin-top: 20px;
+}
+
+.remove-btn {
+    background-color: #ea2239;
 }
 
 .remove-btn:hover {

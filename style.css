@@ -140,8 +140,9 @@ button:hover {
   margin-left: 10px;
 }
 .mark-done-btn {
+  margin-bottom: 0px;
   padding: 6px 12px;
-  font-size: 14px;
+  font-size: 15px;
   border-radius: 4px;
   background-color: var(--success-color);
   color: white;

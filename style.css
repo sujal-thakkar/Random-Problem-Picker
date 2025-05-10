@@ -164,6 +164,12 @@ button:hover {
   margin-bottom: 24px;
   transition: var(--theme-transition);
 }
+.congo-para {
+  font-family: sans-serif;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 21px;
+}
 a {
   color: var(--primary-color);
   text-decoration: none;
@@ -227,7 +233,7 @@ a:hover {
   background-color: #d32f2f;
 }
 .celebration {
-  font-size: 24px;
+  font-size: 30px;
   color: #4caf50;
   margin-top: 20px;
   animation: bounce 1s infinite alternate;

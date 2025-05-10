@@ -193,7 +193,7 @@ function pickRandomQuestion() {
                     `;
         } else {
             document.getElementById('questionBox').innerHTML = `
-                        <p>Congratulations! You've completed all questions. 🎉</p>
+                        <p class="congo-para">Congratulations! You've completed all questions.</p>
                         <div class="celebration">🎉🎊🎉</div>
                     `;
         }

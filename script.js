@@ -1,8 +1,6 @@
 let questions = [];
 let completedQuestions = [];
 let currentQuestion = null;
-
-// NeetCode topics mapping - slug to topic name
 const neetcodeTopics = {
     "two-sum": "Arrays & Hashing",
     "valid-anagram": "Arrays & Hashing",
@@ -149,327 +147,552 @@ const neetcodeTopics = {
     "single-number": "Bit Manipulation",
 };
 
-// Load data from localStorage on page load
+function getSlugFromUrl(url) {
+    try {
+        const parsedUrl = new URL(url);
+        let slug = null;
+
+        if (parsedUrl.hostname.includes("leetcode.com") || parsedUrl.hostname.includes("neetcode.io")) {
+            const match = parsedUrl.pathname.match(/problems\/([^\/]+)\/?/);
+            slug = match ? match[1] : null;
+        }
+
+        if (!slug) return null;
+
+        // Normalize known mismatches between NeetCode and LeetCode
+        const slugMap = {
+            "string-encode-and-decode": "encode-and-decode-strings",
+            "task-scheduling": "task-scheduler",
+            "max-consecutive-ones-iii": "longest-substring-without-repeating-characters",
+            "array-nesting": "product-of-array-except-self"
+            // You can extend this as you encounter more mismatches
+        };
+
+        return slugMap[slug] || slug;
+    } catch (e) {
+        console.error("Invalid URL:", url);
+        return null;
+    }
+}
+
+
+// Tab switching functionality
+document.addEventListener('DOMContentLoaded', function () {
+    const tabButtons = document.querySelectorAll('.tab-button');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Remove active class from all buttons and tab contents
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Show corresponding tab content
+            const tabId = this.getAttribute('data-tab') + 'Tab';
+            document.getElementById(tabId).classList.add('active');
+
+            // If switching to the problem list tab, update the problem list
+            if (tabId === 'problemListTab') {
+                updateProblemList();
+                populateTopicFilter();
+            }
+        });
+    });
+});
+
 window.onload = function () {
     loadData();
     updateTheme();
     updateProgressBar();
+
+    // Initialize tab buttons
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab') + 'Tab';
+            document.getElementById(tabId).classList.add('active');
+
+            if (tabId === 'problemListTab') {
+                updateProblemList();
+                populateTopicFilter();
+            }
+        });
+    });
+
+    // Initialize the problem list
+    updateProblemList();
+    populateTopicFilter();
 };
 
-// Load saved data from localStorage
 function loadData() {
-    const savedQuestions = localStorage.getItem('dsaQuestions');
-    const savedCompletedQuestions = localStorage.getItem('dsaCompletedQuestions');
-
+    const savedQuestions = localStorage.getItem("dsaQuestions");
+    const savedCompletedQuestions = localStorage.getItem("dsaCompletedQuestions");
     if (savedQuestions) {
         questions = JSON.parse(savedQuestions);
     }
-
     if (savedCompletedQuestions) {
         completedQuestions = JSON.parse(savedCompletedQuestions);
     }
-
     updateCompletedList();
     updateProgressBar();
 }
 
-// Save data to localStorage
 function saveData() {
-    localStorage.setItem('dsaQuestions', JSON.stringify(questions));
-    localStorage.setItem('dsaCompletedQuestions', JSON.stringify(completedQuestions));
+    localStorage.setItem("dsaQuestions", JSON.stringify(questions));
+    localStorage.setItem("dsaCompletedQuestions", JSON.stringify(completedQuestions));
 }
 
-// Pick a random question from the list
 function pickRandomQuestion() {
-    // Filter out completed questions
-    const availableQuestions = questions.filter(q =>
-        !completedQuestions.some(cq => cq.url === q.url)
+    const availableQuestions = questions.filter(
+        (q) => !completedQuestions.some((cq) => cq.url === q.url)
     );
-
     if (availableQuestions.length === 0) {
         if (questions.length === 0) {
-            document.getElementById('questionBox').innerHTML = `
-                        <p>No questions available. Add some problems first!</p>
-                    `;
+            document.getElementById("questionBox").innerHTML = `
+                <p>No questions available. Add some problems first!</p>
+            `;
         } else {
-            document.getElementById('questionBox').innerHTML = `
-                        <p class="congo-para">Congratulations! You've completed all questions.</p>
-                        <div class="celebration">🎉🎊🎉</div>
-                    `;
+            document.getElementById("questionBox").innerHTML = `
+                <p class="congo-para">Congratulations! You've completed all questions.</p>
+                <div class="celebration">🎉🎊🎉</div>
+            `;
         }
         return;
     }
-
-    // Pick a random question from available ones
     const randomIndex = Math.floor(Math.random() * availableQuestions.length);
     currentQuestion = availableQuestions[randomIndex];
-
-    // Display the question (without revealing the topic)
-    document.getElementById('questionBox').innerHTML = `
-                <h2>${currentQuestion.title}</h2>
-                <p><a href="${currentQuestion.url}" target="_blank">Open problem in LeetCode</a></p>
-                <button onclick="markAsCompleted(currentQuestion)">Mark as Completed</button>
-            `;
+    document.getElementById("questionBox").innerHTML = `
+        <h2>${currentQuestion.title}</h2>
+        <p><a href="${currentQuestion.url}" target="_blank">Open problem in LeetCode</a></p>
+        <button onclick="markAsCompleted(currentQuestion)">Mark as Completed</button>
+    `;
 }
 
-// Mark a question as completed
 function markAsCompleted(question) {
     if (!question) return;
-
-    if (!completedQuestions.some(q => q.url === question.url)) {
-        completedQuestions.push(question);
+    if (!completedQuestions.some((q) => q.url === question.url)) {
+        const completedQuestion = {
+            ...question,
+            completedDate: new Date().toISOString(),
+        };
+        completedQuestions.push(completedQuestion);
         saveData();
         updateCompletedList();
         updateProgressBar();
-
-        // Show success message in question box
-        document.getElementById('questionBox').innerHTML = `
-                    <p>Question marked as completed! 🎉</p>
-                    <button onclick="pickRandomQuestion()">Pick Another Question</button>
-                `;
+        document.getElementById("questionBox").innerHTML = `
+            <p>Question marked as completed! 🎉</p>
+            <button onclick="pickRandomQuestion()">Pick Another Question</button>
+        `;
     }
 }
 
-// Mark a question as incomplete (remove from completed list)
 function markAsIncomplete(url) {
-    completedQuestions = completedQuestions.filter(q => q.url !== url);
+    completedQuestions = completedQuestions.filter((q) => q.url !== url);
     saveData();
     updateCompletedList();
     updateProgressBar();
+    updateProblemList(); // Update problem list to reflect changes
 }
 
-// Update the completed questions list
 function updateCompletedList() {
-    const completedList = document.getElementById('completedList');
-    completedList.innerHTML = '';
-
+    const completedList = document.getElementById("completedList");
+    completedList.innerHTML = "";
     if (completedQuestions.length === 0) {
-        completedList.innerHTML = '<li>No completed questions yet.</li>';
+        completedList.innerHTML = "<li>No completed questions yet.</li>";
         return;
     }
-
-    // Sort completed questions by completion date (if available)
     completedQuestions.sort((a, b) => {
         if (a.completedDate && b.completedDate) {
             return new Date(b.completedDate) - new Date(a.completedDate);
         }
         return 0;
     });
-
-    // Add each completed question to the list with its topic
     for (const question of completedQuestions) {
-        const listItem = document.createElement('li');
-        listItem.className = 'completed-item';
-
-        // Include the topic tag only in the completed list
+        const listItem = document.createElement("li");
+        listItem.className = "completed-item";
         listItem.innerHTML = `
-                    <span class="completed-title">${question.title}</span>
-                    <span class="topic-tag">${question.topic || 'Other'}</span>
-                    <button onclick="markAsIncomplete('${question.url}')" 
-                            style="margin-left: 10px; background-color: var(--danger-color); padding: 2px 8px; font-size: 12px;">
-                        Remove
-                    </button>
-                `;
+            <span class="completed-title">${question.title}</span>
+            <span class="topic-tag">${question.topic || "Other"}</span>
+            <button onclick="markAsIncomplete('${question.url}')" 
+                    class="remove-btn small-button danger">
+                Remove
+            </button>
+        `;
         completedList.appendChild(listItem);
     }
 }
 
-// Update progress bar
 function updateProgressBar() {
-    const progressText = document.getElementById('progressText');
-    const progressFill = document.getElementById('progressFill');
-
+    const progressText = document.getElementById("progressText");
+    const progressFill = document.getElementById("progressFill");
     const total = questions.length;
     const completed = completedQuestions.length;
     const percentage = total > 0 ? (completed / total) * 100 : 0;
-
     progressText.textContent = `${completed}/${total}`;
     progressFill.style.width = `${percentage}%`;
 }
 
-// Search questions
 function searchQuestions() {
-    const searchInput = document.getElementById('searchInput');
-    const searchResults = document.getElementById('searchResults');
+    const searchInput = document.getElementById("searchInput");
+    const searchResults = document.getElementById("searchResults");
     const searchTerm = searchInput.value.toLowerCase().trim();
-
-    if (searchTerm === '') {
-        searchResults.style.display = 'none';
+    if (searchTerm === "") {
+        searchResults.style.display = "none";
         return;
     }
-
-    // Filter questions based on search term
-    const filteredQuestions = questions.filter(q =>
+    const filteredQuestions = questions.filter((q) =>
         q.title.toLowerCase().includes(searchTerm)
     );
-
-    // Display search results
-    searchResults.innerHTML = '';
-
+    searchResults.innerHTML = "";
     if (filteredQuestions.length === 0) {
         searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
     } else {
         for (const question of filteredQuestions) {
-            const isCompleted = completedQuestions.some(q => q.url === question.url);
-
-            const resultItem = document.createElement('div');
-            resultItem.className = 'search-result-item';
-
-            // Create the title element
-            const titleElement = document.createElement('div');
-            titleElement.className = 'search-result-title';
+            const isCompleted = completedQuestions.some((q) => q.url === question.url);
+            const resultItem = document.createElement("div");
+            resultItem.className = "search-result-item";
+            const titleElement = document.createElement("div");
+            titleElement.className = "search-result-title";
             titleElement.textContent = question.title;
-
-            // Create the button element
-            const buttonElement = document.createElement('button');
-            buttonElement.className = `mark-done-btn ${isCompleted ? 'completed' : ''}`;
-            buttonElement.textContent = isCompleted ? 'Mark Incomplete' : 'Mark Complete';
-
-            // Add event listener to the button
-            buttonElement.addEventListener('click', function () {
+            const buttonElement = document.createElement("button");
+            buttonElement.className = `mark-done-btn ${isCompleted ? "completed" : ""}`;
+            buttonElement.textContent = isCompleted ? "Mark Incomplete" : "Mark Complete";
+            buttonElement.addEventListener("click", function () {
                 if (isCompleted) {
                     markAsIncomplete(question.url);
                 } else {
                     markAsCompleted(question);
                 }
-                // Close search results after action
-                searchResults.style.display = 'none';
-                searchInput.value = '';
+                searchResults.style.display = "none";
+                searchInput.value = "";
             });
-
-            // Append elements to the result item
             resultItem.appendChild(titleElement);
             resultItem.appendChild(buttonElement);
             searchResults.appendChild(resultItem);
         }
     }
-
-    searchResults.style.display = 'block';
+    searchResults.style.display = "block";
 }
 
-// Add a custom problem
 function addCustomProblem() {
-    const problemUrl = document.getElementById('problemUrl').value.trim();
-    const statusElement = document.getElementById('addProblemStatus');
-
+    const problemUrl = document.getElementById("problemUrl").value.trim();
+    const statusElement = document.getElementById("addProblemStatus");
     if (!problemUrl) {
-        showStatus('Please enter a LeetCode problem URL', 'error');
+        showStatus("Please enter a problem URL", "error");
         return;
     }
-
-    // Validate LeetCode URL
-    if (!problemUrl.includes('leetcode.com/problems/')) {
-        showStatus('Please enter a valid LeetCode problem URL', 'error');
+    if (!problemUrl.includes("leetcode.com/problems/") && !problemUrl.includes("neetcode.io/problems/")) {
+        showStatus("Please enter a valid LeetCode or NeetCode problem URL", "error");
         return;
     }
-
-    // Check for duplicates
-    if (questions.some(q => q.url === problemUrl)) {
-        showStatus('This problem is already in your list', 'error');
+    if (questions.some((q) => q.url === problemUrl)) {
+        showStatus("This problem is already in your list", "error");
         return;
     }
-
-    // Extract problem slug from URL
-    // Format: https://leetcode.com/problems/two-sum/
     try {
-        const urlParts = problemUrl.split('/');
-        const problemIndex = urlParts.indexOf('problems');
-
-        if (problemIndex === -1 || problemIndex + 1 >= urlParts.length) {
-            throw new Error('Invalid URL format');
+        const problemSlug = getSlugFromUrl(problemUrl);
+        if (!problemSlug) {
+            throw new Error("Could not extract problem slug");
         }
-
-        const problemSlug = urlParts[problemIndex + 1];
 
         if (!problemSlug) {
-            throw new Error('Could not extract problem slug');
+            throw new Error("Could not extract problem slug");
         }
-
-        // Generate a title from the slug
-        let title = problemSlug.split('-').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
-
-        // Determine topic from NeetCode mapping
-        let topic = 'Other';
+        title = problemSlug
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+        let topic = "Other";
         if (neetcodeTopics[problemSlug]) {
             topic = neetcodeTopics[problemSlug];
         }
-
-        // Add the problem to the list
         const newProblem = {
             title: title,
             url: problemUrl,
             topic: topic,
-            addedDate: new Date().toISOString()
+            addedDate: new Date().toISOString(),
         };
-
         questions.push(newProblem);
         saveData();
         updateProgressBar();
-
-        // Clear input and show success message
-        document.getElementById('problemUrl').value = '';
-        showStatus('Problem added successfully!', 'success');
+        updateProblemList();
+        populateTopicFilter(); // Repopulate topic filter after adding a new problem
+        document.getElementById("problemUrl").value = "";
+        showStatus("Problem added successfully!", "success");
     } catch (error) {
-        showStatus('Error processing URL. Please check the format.', 'error');
+        showStatus("Error processing URL. Please check the format.", "error");
         console.error(error);
     }
 }
 
-// Show status message
 function showStatus(message, type) {
-    const statusElement = document.getElementById('addProblemStatus');
+    const statusElement = document.getElementById("addProblemStatus");
     statusElement.textContent = message;
     statusElement.className = type;
-
-    // Clear status after 3 seconds
+    statusElement.style.display = "block";
     setTimeout(() => {
-        statusElement.className = '';
-        statusElement.textContent = '';
+        statusElement.className = "";
+        statusElement.style.display = "none";
+        statusElement.textContent = "";
     }, 3000);
 }
 
-// Reset progress (clear completed questions)
 function resetProgress() {
-    if (confirm('Are you sure you want to reset your progress? This will clear all completed questions.')) {
+    if (confirm("Are you sure you want to reset your progress? This will clear all completed questions.")) {
         completedQuestions = [];
         saveData();
         updateCompletedList();
         updateProgressBar();
-        document.getElementById('questionBox').innerHTML = '<p>Progress has been reset. Click the button to get a random question.</p>';
+        updateProblemList(); // Update problem list to reflect changes
+        document.getElementById("questionBox").innerHTML = "<p>Progress has been reset. Click the button to get a random question.</p>";
     }
 }
 
-// Theme toggle functionality
-document.getElementById('themeToggle').addEventListener('click', function () {
-    document.body.classList.toggle('dark-mode');
+document.getElementById("themeToggle").addEventListener("click", function () {
+    document.body.classList.toggle("dark-mode");
     updateThemeIcon();
-
-    // Save theme preference
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    localStorage.setItem('darkMode', isDarkMode);
+    const isDarkMode = document.body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", isDarkMode);
 });
 
-// Update theme icon based on current mode
 function updateThemeIcon() {
-    const themeIcon = document.getElementById('themeToggle').querySelector('i');
-    if (document.body.classList.contains('dark-mode')) {
-        themeIcon.className = 'fas fa-sun';
+    const themeIcon = document.getElementById("themeToggle").querySelector("i");
+    if (document.body.classList.contains("dark-mode")) {
+        themeIcon.className = "fas fa-sun";
     } else {
-        themeIcon.className = 'fas fa-moon';
+        themeIcon.className = "fas fa-moon";
     }
 }
 
-// Check and apply saved theme preference
 function updateTheme() {
-    const savedTheme = localStorage.getItem('darkMode');
-
-    if (savedTheme === 'true') {
-        document.body.classList.add('dark-mode');
+    const savedTheme = localStorage.getItem("darkMode");
+    if (savedTheme === "true") {
+        document.body.classList.add("dark-mode");
     } else {
-        document.body.classList.remove('dark-mode');
+        document.body.classList.remove("dark-mode");
+    }
+    updateThemeIcon();
+}
+
+function updateProblemList() {
+    const problemListContainer = document.getElementById("problemListContainer");
+    if (!problemListContainer) return;
+
+    problemListContainer.innerHTML = "<h2>All Problems</h2>";
+
+    if (questions.length === 0) {
+        problemListContainer.innerHTML += "<p>No problems added yet.</p>";
+        return;
     }
 
-    updateThemeIcon();
+    // Sort questions by topic and then by title
+    const sortedQuestions = [...questions].sort((a, b) => {
+        if (a.topic !== b.topic) {
+            return a.topic.localeCompare(b.topic);
+        }
+        return a.title.localeCompare(b.title);
+    });
+
+    const table = document.createElement("table");
+    table.className = "problem-table";
+
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+        <tr>
+            <th>Title</th>
+            <th>Topic</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    let currentTopic = "";
+
+    for (const question of sortedQuestions) {
+        const isCompleted = completedQuestions.some((q) => q.url === question.url);
+
+        if (question.topic !== currentTopic) {
+            currentTopic = question.topic;
+            const topicRow = document.createElement("tr");
+            topicRow.className = "topic-divider";
+            topicRow.innerHTML = `<td colspan="4">${currentTopic}</td>`;
+            tbody.appendChild(topicRow);
+        }
+
+        const tr = document.createElement("tr");
+        tr.className = isCompleted ? "problem-completed" : "";
+        tr.innerHTML = `
+            <td><a href="${question.url}" target="_blank">${question.title}</a></td>
+            <td>${question.topic}</td>
+            <td>${isCompleted ? "✅ Completed" : "⏳ Pending"}</td>
+            <td class="action-buttons">
+                <button class="small-button edit" onclick="editProblem('${encodeURIComponent(
+            JSON.stringify(question)
+        )}')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="small-button danger" onclick="deleteProblem('${question.url}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+    problemListContainer.appendChild(table);
+
+    // Re-populate the topic filter
+    populateTopicFilter();
+}
+
+function deleteProblem(url) {
+    if (confirm("Are you sure you want to delete this problem?")) {
+        questions = questions.filter((q) => q.url !== url);
+        completedQuestions = completedQuestions.filter((q) => q.url !== url);
+        saveData();
+        updateProblemList();
+        updateProgressBar();
+        updateCompletedList();
+        populateTopicFilter(); // Repopulate topic filter after deleting a problem
+        showStatus("Problem deleted successfully", "success");
+    }
+}
+
+function editProblem(encodedProblem) {
+    const problem = JSON.parse(decodeURIComponent(encodedProblem));
+    const modal = document.getElementById("editModal");
+    modal.style.display = "block";
+    document.getElementById("editTitle").value = problem.title;
+    document.getElementById("editUrl").value = problem.url;
+    document.getElementById("editTopic").value = problem.topic;
+    document.getElementById("originalUrl").value = problem.url;
+}
+
+function closeEditModal() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+function saveProblemEdit() {
+    const title = document.getElementById("editTitle").value.trim();
+    const url = document.getElementById("editUrl").value.trim();
+    const topic = document.getElementById("editTopic").value.trim();
+    const originalUrl = document.getElementById("originalUrl").value;
+
+    if (!title || !url) {
+        alert("Title and URL are required!");
+        return;
+    }
+
+    if (url !== originalUrl && questions.some((q) => q.url === url)) {
+        alert("This URL already exists in your problem list!");
+        return;
+    }
+
+    const index = questions.findIndex((q) => q.url === originalUrl);
+    if (index !== -1) {
+        const updatedProblem = {
+            ...questions[index],
+            title: title,
+            url: url,
+            topic: topic,
+        };
+        questions[index] = updatedProblem;
+
+        const completedIndex = completedQuestions.findIndex((q) => q.url === originalUrl);
+        if (completedIndex !== -1) {
+            completedQuestions[completedIndex] = {
+                ...completedQuestions[completedIndex],
+                title: title,
+                url: url,
+                topic: topic,
+            };
+        }
+
+        saveData();
+        updateProblemList();
+        updateCompletedList();
+        populateTopicFilter(); // Update topic filter after editing
+        closeEditModal();
+        showStatus("Problem updated successfully", "success");
+    }
+}
+
+function populateTopicFilter() {
+    const topicFilter = document.getElementById("topicFilter");
+    if (!topicFilter) return;
+
+    // Get unique topics from questions
+    const topics = [...new Set(questions.map((q) => q.topic))].sort();
+
+    // Clear existing options except the first one ("All Topics")
+    while (topicFilter.options.length > 1) {
+        topicFilter.remove(1);
+    }
+
+    // Add topic options
+    topics.forEach((topic) => {
+        const option = document.createElement("option");
+        option.value = topic;
+        option.textContent = topic;
+        topicFilter.appendChild(option);
+    });
+}
+
+function applyFilters() {
+    const topicFilter = document.getElementById("topicFilter").value;
+    const statusFilter = document.getElementById("statusFilter").value;
+    const searchText = document.getElementById("tableSearchInput").value.toLowerCase();
+
+    const tableRows = document.querySelectorAll(".problem-table tbody tr:not(.topic-divider)");
+    const topicDividers = document.querySelectorAll(".problem-table tbody tr.topic-divider");
+
+    // Reset display for all rows
+    tableRows.forEach((row) => (row.style.display = "table-row"));
+    topicDividers.forEach((divider) => (divider.style.display = "table-row"));
+
+    // Apply filters
+    tableRows.forEach((row) => {
+        const rowTitle = row.querySelector("td:nth-child(1)").textContent.toLowerCase();
+        const rowTopic = row.querySelector("td:nth-child(2)").textContent;
+        const isCompleted = row.classList.contains("problem-completed");
+
+        const matchesTopic = topicFilter === "all" || rowTopic === topicFilter;
+        const matchesStatus = statusFilter === "all" ||
+            (statusFilter === "completed" && isCompleted) ||
+            (statusFilter === "pending" && !isCompleted);
+        const matchesSearch = searchText === "" || rowTitle.includes(searchText);
+
+        row.style.display = matchesTopic && matchesStatus && matchesSearch ? "table-row" : "none";
+    });
+
+    // Update topic dividers visibility
+    updateTopicDividers();
+}
+
+function updateTopicDividers() {
+    const topicDividers = document.querySelectorAll(".problem-table tbody tr.topic-divider");
+
+    topicDividers.forEach((divider) => {
+        let hasVisibleProblems = false;
+        let nextElement = divider.nextElementSibling;
+
+        while (nextElement && !nextElement.classList.contains("topic-divider")) {
+            if (nextElement.style.display !== "none") {
+                hasVisibleProblems = true;
+                break;
+            }
+            nextElement = nextElement.nextElementSibling;
+        }
+
+        divider.style.display = hasVisibleProblems ? "table-row" : "none";
+    });
 }

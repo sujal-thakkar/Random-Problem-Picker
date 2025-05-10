@@ -182,7 +182,7 @@ a:hover {
 }
 .completed {
   text-decoration: line-through;
-  color: #7f8c8d;
+  color: #cacaca;
 }
 .progress {
   margin-top: 20px;

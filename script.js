@@ -269,7 +269,7 @@ function pickRandomQuestion() {
     currentQuestion = availableQuestions[randomIndex];
     document.getElementById("questionBox").innerHTML = `
         <h2>${currentQuestion.title}</h2>
-        <p><a href="${currentQuestion.url}" target="_blank">Open problem in LeetCode</a></p>
+        <p style="margin: 35px 0px;"><a href="${currentQuestion.url}" target="_blank">Open problem in LeetCode</a></p>
         <button onclick="markAsCompleted(currentQuestion)">Mark as Completed</button>
     `;
 }

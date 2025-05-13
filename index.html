@@ -33,13 +33,20 @@
         <div class="actions-container">
             <button id="nextQuestionBtn" onclick="pickRandomQuestion()">Give me a question</button>
             <div class="search-container">
-                <input id="searchInput" placeholder="Search for a question..." onkeyup="searchQuestions()">
+                <input id="searchInput" placeholder="Search for a question..." onkeyup="searchQuestions()"
+                    style="padding-right: 6px;">
             </div>
         </div>
 
-        <div class="question-box" id="questionBox">
-            <p>Click the button to get a random DSA question.</p>
+        <div class="question-box" id="questionBox" style="
+            padding-right: 0px;
+            padding-left: 0px;
+        ">
+            <h2>3sum</h2>
+            <p><a href="https://leetcode.com/problems/3sum/" target="_blank">Open problem in LeetCode</a></p>
+            <button onclick="markAsCompleted(currentQuestion)">Mark as Completed</button>
         </div>
+
 
         <div class="search-results" id="searchResults"></div>
 
@@ -86,7 +93,10 @@
 
             <div class="filter-row">
                 <div class="filter-group full-width">
-                    <input id="tableSearchInput" placeholder="Search in problems..." onkeyup="applyFilters()">
+                    <input id="tableSearchInput" placeholder="Search in problems..." onkeyup="applyFilters()" style="
+                        padding-right: 0px;
+                        max-width: 576px;
+                    ">
                 </div>
             </div>
         </div>

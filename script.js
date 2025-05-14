@@ -317,7 +317,7 @@ function updateCompletedList() {
         const listItem = document.createElement("li");
         listItem.className = "completed-item";
         listItem.innerHTML = `
-            <span class="completed-title">${question.title}</span>
+            <span class="completed-title"><a href="${question.url}" target="_blank">${question.title}</a></span>
             <span class="topic-tag">${question.topic || "Other"}</span>
             <button onclick="markAsIncomplete('${question.url}')" 
                     class="remove-btn small-button danger">
@@ -359,7 +359,12 @@ function searchQuestions() {
             resultItem.className = "search-result-item";
             const titleElement = document.createElement("div");
             titleElement.className = "search-result-title";
-            titleElement.textContent = question.title;
+            // Create a hyperlink for the title
+            const titleLink = document.createElement("a");
+            titleLink.href = question.url;
+            titleLink.target = "_blank"; // Open in new tab
+            titleLink.textContent = question.title;
+            titleElement.appendChild(titleLink);
             const buttonElement = document.createElement("button");
             buttonElement.className = `mark-done-btn ${isCompleted ? "completed" : ""}`;
             buttonElement.textContent = isCompleted ? "Mark Incomplete" : "Mark Complete";

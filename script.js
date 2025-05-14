@@ -504,7 +504,7 @@ function updateProblemList() {
 
     const thead = document.createElement("thead");
     thead.innerHTML = `
-        <tr>
+        <tr class="table-header">
             <th>Title</th>
             <th>Topic</th>
             <th>Status</th>

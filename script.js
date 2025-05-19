@@ -12,7 +12,7 @@ const neetcodeTopics = {
     "longest-consecutive-sequence": "Arrays & Hashing",
     "encode-and-decode-strings": "Arrays & Hashing",
     "valid-palindrome": "Two Pointers",
-    "two-sum-ii-input-array-is-sorted": "Two Pointers",
+    "two-sum-II-input-array-is-sorted": "Two Pointers",
     "3sum": "Two Pointers",
     "container-with-most-water": "Two Pointers",
     "trapping-rain-water": "Two Pointers",

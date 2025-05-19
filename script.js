@@ -489,7 +489,8 @@ function updateProblemList() {
     const problemListContainer = document.getElementById("problemListContainer");
     if (!problemListContainer) return;
 
-    problemListContainer.innerHTML = "<h2>All Problems</h2>";
+    problemListContainer.innerHTML = `
+  <h2 class="all-problems-title">📚 All Problems</h2>`;
 
     if (questions.length === 0) {
         problemListContainer.innerHTML += "<p>No problems added yet.</p>";
@@ -701,3 +702,26 @@ function updateTopicDividers() {
         divider.style.display = hasVisibleProblems ? "table-row" : "none";
     });
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    if (searchInput && searchClearBtn) {
+        // Show/hide clear button based on input
+        searchInput.addEventListener('input', function () {
+            if (this.value) {
+                searchClearBtn.classList.add('visible');
+            } else {
+                searchClearBtn.classList.remove('visible');
+            }
+        });
+
+        // Clear input and deactivate (blur) on click
+        searchClearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            searchInput.blur();
+            searchClearBtn.classList.remove('visible');
+            document.getElementById('searchResults').style.display = 'none';
+        });
+    }
+});

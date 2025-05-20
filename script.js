@@ -286,7 +286,10 @@ function markAsCompleted(question) {
         updateCompletedList();
         updateProgressBar();
         document.getElementById("questionBox").innerHTML = `
-            <p>Question marked as completed! 🎉</p>
+            <p class="completed-message">
+                <i class="fas fa-check-circle"></i>
+                Question marked as completed!
+            </p>
             <button onclick="pickRandomQuestion()">Pick Another Question</button>
         `;
     }

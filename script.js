@@ -259,9 +259,15 @@ function pickRandomQuestion() {
             `;
         } else {
             document.getElementById("questionBox").innerHTML = `
-                <p class="congo-para">Congratulations! You've completed all questions.</p>
-                <div class="celebration">🎉🎊🎉</div>
+                <div class="congo-success" id="congoSuccessMsg">Congratulations! You've completed all questions. 🎉🎊🎉</div>
             `;
+            // Two-stage confetti effect: add confetti class after a short delay
+            setTimeout(() => {
+                const congoMsg = document.getElementById("congoSuccessMsg");
+                if (congoMsg) {
+                    congoMsg.classList.add("confetti");
+                }
+            }, 700); // Delay matches pop-in animation
         }
         return;
     }
@@ -285,10 +291,22 @@ function markAsCompleted(question) {
         saveData();
         updateCompletedList();
         updateProgressBar();
+        // Show celebratory status message
         document.getElementById("questionBox").innerHTML = `
-            <p>Question marked as completed! 🎉</p>
+            <div id="completionStatus"></div>
             <button onclick="pickRandomQuestion()">Pick Another Question</button>
         `;
+        showStatus("Question marked as completed! 🎉", "status-done");
+        // Move the status message to the question box for visibility
+        setTimeout(() => {
+            const status = document.getElementById("addProblemStatus");
+            const completionStatus = document.getElementById("completionStatus");
+            if (status && completionStatus && status.textContent) {
+                completionStatus.innerHTML = `<span class='status-done'>${status.textContent}</span>`;
+                status.style.display = "none";
+                status.textContent = "";
+            }
+        }, 10);
     }
 }
 
